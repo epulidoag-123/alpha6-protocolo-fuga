@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALPHA-6: Protocolo de Fuga | Exploración y Supervivencia 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b1114;
+      --bg-panel: #121c21;
+      --bg-card: #162329;
+      --border: #263d47;
+      --text: #e6f1f5;
+      --muted: #9bb3bd;
+      --cyan: #4dd0e1;
+      --cyan-dim: rgba(77, 208, 225, 0.15);
+      --gold: #e3c84a;
+      --green: #6db85b;
+      --amber: #f09a3e;
+      --red: #f26b55;
+      --purple: #a855f7;
+      --sky: #0ea5e9;
+      --font-title: 'Rajdhani', sans-serif;
+      --font-body: 'Exo 2', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    /* Fondo degradado original de negro a azul + textura sutil de la estación espacial */
+    body {
+      font-family: var(--font-body);
+      background-color: #070b0d;
+      background-image:
+        radial-gradient(circle at top right, rgba(18, 36, 44, 0.88) 0%, rgba(11, 17, 20, 0.94) 55%, rgba(6, 9, 11, 0.98) 100%),
+        url('estacion.jpg');
+      background-size: cover;
+      background-position: center top;
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+    /* Navbar */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(9, 14, 17, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-wrap {
+      max-width: 1200px; margin: 0 auto; padding: 0.85rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-title); font-size: 1.45rem; font-weight: 700;
+      letter-spacing: 2px; color: var(--text);
+    }
+    .brand span { color: var(--gold); }
+    nav ul {
+      list-style: none; display: flex; align-items: center; gap: 0.95rem;
+    }
+    nav a {
+      color: var(--muted); font-weight: 600; font-size: 0.83rem;
+      text-transform: uppercase; letter-spacing: 0.6px; transition: color 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--cyan); }
+    .nav-demo-btn {
+      background: var(--gold); color: #0b1114 !important;
+      padding: 0.45rem 1rem; border-radius: 4px; font-weight: 700;
+      font-family: var(--font-title); font-size: 0.96rem; letter-spacing: 1px;
+    }
+    .nav-demo-btn:hover { opacity: 0.9; }
+    .menu-toggle {
+      display: none; background: none; border: 1px solid var(--border);
+      color: var(--text); padding: 0.4rem 0.65rem; border-radius: 4px; cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    /* Banner Hero con Estación Espacial (estacion.jpg) y degradado negro a azul */
+    .hero-banner {
+      position: relative;
+      background-image:
+        linear-gradient(90deg, rgba(6, 10, 13, 0.92) 0%, rgba(10, 18, 23, 0.74) 52%, rgba(12, 27, 36, 0.58) 100%),
+        linear-gradient(180deg, rgba(7, 11, 14, 0.20) 0%, rgba(11, 17, 20, 0.97) 100%),
+        url('estacion.jpg');
+      background-size: cover;
+      background-position: center;
+      border-bottom: 1px solid rgba(38, 61, 71, 0.75);
+    }
+
+    /* Secciones */
+    section { max-width: 1200px; margin: 0 auto; padding: 4.5rem 1.25rem; }
+    .section-tag {
+      font-family: var(--font-title); color: var(--cyan); letter-spacing: 2.5px;
+      text-transform: uppercase; font-size: 0.9rem; margin-bottom: 0.4rem;
+    }
+    h1, h2, h3 { font-family: var(--font-title); letter-spacing: 1px; line-height: 1.15; }
+    h2 { font-size: clamp(1.9rem, 3.2vw, 2.6rem); margin-bottom: 1.1rem; }
+    .lead { color: var(--muted); max-width: 760px; margin-bottom: 2rem; }
+
+    /* Hero y Título con Vida */
+    .hero {
+      display: grid; grid-template-columns: 1.12fr 0.88fr; gap: 2.5rem;
+      align-items: center; min-height: 85vh; padding-top: 3.2rem; padding-bottom: 3.5rem;
+    }
+    .sector-pill {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      font-family: var(--font-title); font-size: 0.92rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--cyan);
+      background: rgba(77, 208, 225, 0.1);
+      border: 1px solid rgba(77, 208, 225, 0.38);
+      padding: 0.32rem 0.9rem; border-radius: 999px;
+      margin-bottom: 1.1rem;
+    }
+    .sector-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+      animation: blinkDot 2s ease-in-out infinite;
+    }
+    @keyframes blinkDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+
+    .hero-title {
+      font-size: clamp(3.5rem, 7.2vw, 5.7rem);
+      font-weight: 700;
+      letter-spacing: 6px;
+      line-height: 0.95;
+      margin-bottom: 0.55rem;
+      background: linear-gradient(110deg, #ffffff 15%, #b9ecef 48%, #4dd0e1 75%, #ffffff 95%);
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 24px rgba(77, 208, 225, 0.28));
+      animation: titleShimmer 6s linear infinite;
+    }
+    .hero-title .num-accent {
+      background: linear-gradient(135deg, #f7e27d 0%, #e3c84a 55%, #f09a3e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 18px rgba(227, 200, 74, 0.4));
+    }
+    @keyframes titleShimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 220% center; }
+    }
+
+    .hero-subtitle-wrap {
+      display: flex; align-items: center; gap: 0.9rem;
+      margin-bottom: 1.35rem;
+    }
+    .hero-sub-bar {
+      width: 46px; height: 3px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--cyan));
+      box-shadow: 0 0 10px rgba(77, 208, 225, 0.5);
+    }
+    .hero-sub {
+      font-family: var(--font-title);
+      font-size: clamp(1.2rem, 2.3vw, 1.65rem);
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-shadow: 0 0 16px rgba(227, 200, 74, 0.28);
+    }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.6rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.82rem 1.4rem; border-radius: 4px; font-weight: 700;
+      font-family: var(--font-title); font-size: 1.04rem; letter-spacing: 1.2px;
+      text-transform: uppercase; cursor: pointer; border: none; transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--gold); color: #0b1114;
+      box-shadow: 0 6px 22px rgba(227, 200, 74, 0.26);
+    }
+    .btn-secondary { background: rgba(22, 35, 41, 0.9); color: var(--text); border: 1px solid var(--border); }
+    .btn-cyan { background: var(--cyan); color: #0b1114; }
+
+    /* Ficha técnica rápida en Hero */
+    .meta-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+      margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(38, 61, 71, 0.85);
+    }
+    .meta-item span {
+      display: block; font-size: 0.74rem; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted);
+    }
+    .meta-item strong {
+      font-family: var(--font-title); font-size: 1.05rem; color: var(--text);
+    }
+
+    /* Tarjeta Visual del Protagonista (alpha6.jpg) + Bitácora */
+    .hero-visual {
+      position: relative;
+      background: rgba(14, 22, 26, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+    }
+    .hero-visual::before,
+    .hero-visual::after {
+      content: "";
+      position: absolute;
+      width: 16px; height: 16px;
+      pointer-events: none;
+    }
+    .hero-visual::before {
+      top: -1px; left: -1px;
+      border-top: 2px solid var(--cyan);
+      border-left: 2px solid var(--cyan);
+    }
+    .hero-visual::after {
+      bottom: -1px; right: -1px;
+      border-bottom: 2px solid var(--gold);
+      border-right: 2px solid var(--gold);
+    }
+    .hero-character-frame {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(77, 208, 225, 0.28);
+      background: radial-gradient(circle at center, #142832 0%, #070c0f 100%);
+      aspect-ratio: 4 / 4.2;
+    }
+    .hero-character-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 15%;
+      display: block;
+    }
+    .hero-char-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11,17,20,0.05) 55%, rgba(11,17,20,0.92) 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0.9rem 1rem;
+    }
+    .char-badge {
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .char-status {
+      font-size: 0.76rem;
+      color: var(--gold);
+      background: rgba(11, 17, 20, 0.82);
+      border: 1px solid rgba(227, 200, 74, 0.4);
+      padding: 0.18rem 0.55rem;
+      border-radius: 4px;
+      font-family: var(--font-title);
+      letter-spacing: 1px;
+    }
+
+    .log-box {
+      margin-top: 1rem; text-align: left; background: #0b1216;
+      border: 1px solid var(--border); border-left: 3px solid var(--cyan);
+      padding: 0.95rem 1rem; border-radius: 6px;
+    }
+    .log-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-title); font-size: 0.88rem; color: var(--cyan);
+      margin-bottom: 0.35rem; letter-spacing: 1px;
+    }
+    .log-chapter {
+      font-family: var(--font-title); font-size: 1.12rem; color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+    .log-controls {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;
+    }
+    .log-controls button {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+      padding: 0.25rem 0.72rem; border-radius: 4px; cursor: pointer;
+    }
+    .log-controls button:hover { border-color: var(--cyan); }
+
+    /* Grids & Cards (Estética original con bordes limpios y fondos oscuros) */
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.15rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+    .card {
+      background: rgba(18, 28, 33, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.45rem;
+    }
+    .card h3 { color: var(--cyan); font-size: 1.32rem; margin-bottom: 0.65rem; }
+    .card p, .card li { color: var(--muted); font-size: 0.94rem; }
+    .card ul { padding-left: 1.15rem; margin-top: 0.5rem; }
+    .card li { margin-bottom: 0.35rem; }
+    .card strong { color: var(--text); }
+    .badge {
+      display: inline-block; padding: 0.22rem 0.6rem; border-radius: 4px;
+      font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+      background: var(--cyan-dim); color: var(--cyan); margin-bottom: 0.65rem;
+      letter-spacing: 0.8px;
+    }
+
+    /* Controles visuales */
+    .keys-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .key-item {
+      display: flex; align-items: center; gap: 0.45rem;
+      background: #0d1519; border: 1px solid var(--border);
+      padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.88rem;
+    }
+    kbd {
+      background: var(--bg-card); border: 1px solid var(--cyan); color: var(--cyan);
+      padding: 0.15rem 0.45rem; border-radius: 4px; font-family: var(--font-title);
+      font-weight: 700; font-size: 0.9rem;
+    }
+
+    /* COMPONENTE: JUEGA CON LA BATERÍA */
+    .battery-widget {
+      position: relative;
+      margin-top: 2rem;
+      background: rgba(12, 18, 22, 0.95);
+      border: 1px solid #263d47;
+      padding: 1.85rem;
+      border-radius: 4px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+    .battery-widget::before,
+    .battery-widget::after {
+      content: "";
+      position: absolute;
+      width: 14px; height: 14px;
+      pointer-events: none;
+    }
+    .battery-widget::before {
+      top: -1px; left: -1px;
+      border-top: 2px solid var(--cyan);
+      border-left: 2px solid var(--cyan);
+    }
+    .battery-widget::after {
+      bottom: -1px; right: -1px;
+      border-bottom: 2px solid var(--cyan);
+      border-right: 2px solid var(--cyan);
+    }
+    .bw-title {
+      font-family: var(--font-title); font-size: 1.65rem;
+      color: var(--text); margin-bottom: 0.35rem; letter-spacing: 0.6px;
+    }
+    .bw-desc { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.35rem; }
+    .bw-status-row {
+      display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.55rem;
+    }
+    .bw-state {
+      font-family: var(--font-title); font-size: 1.25rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+    .bw-pct {
+      font-family: var(--font-title); font-size: 2.35rem; font-weight: 700;
+      line-height: 1; color: var(--text);
+    }
+    .bw-pct small { font-size: 1.05rem; color: var(--muted); margin-left: 2px; }
+    .bw-track {
+      width: 100%; height: 18px; background: #141c20;
+      border: 1px solid #485b63; padding: 2px; margin-bottom: 1rem;
+    }
+    .bw-fill {
+      height: 100%; width: 100%; background: var(--green);
+      transition: width 0.18s linear, background-color 0.25s ease;
+    }
+    .bw-legend {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; margin-bottom: 1.6rem;
+    }
+    .bw-leg-item { border-top: 3px solid var(--leg-color); padding-top: 0.45rem; }
+    .bw-leg-item strong {
+      display: block; font-family: var(--font-title); font-size: 0.88rem;
+      letter-spacing: 1.4px; color: #c8d6dc;
+    }
+    .bw-leg-item span { display: block; font-size: 0.8rem; color: var(--muted); }
+    .bw-actions-row {
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 1rem; margin-bottom: 1.15rem;
+    }
+    .bw-btns { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
+    .bw-btn-collect {
+      display: inline-flex; align-items: center; gap: 0.8rem;
+      background: var(--gold); color: #0e1316; border: none; border-radius: 3px;
+      padding: 0.72rem 1.45rem; font-family: var(--font-title); font-size: 1.05rem;
+      font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+      transition: transform 0.12s, opacity 0.2s;
+    }
+    .bw-btn-collect:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.94; }
+    .bw-btn-collect:disabled { opacity: 0.45; cursor: not-allowed; }
+    .bw-keycap {
+      display: inline-grid; place-items: center; width: 28px; height: 28px;
+      border: 1.5px solid rgba(14, 19, 22, 0.45); border-radius: 3px;
+      font-size: 0.92rem; font-weight: 700; background: rgba(255, 255, 255, 0.14);
+    }
+    .bw-btn-reset {
+      background: transparent; color: var(--text); border: 1px solid #485b63;
+      border-radius: 3px; padding: 0.78rem 1.5rem; font-family: var(--font-title);
+      font-size: 1.02rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    .bw-btn-reset:hover { border-color: var(--cyan); color: var(--cyan); }
+    .bw-cells {
+      font-family: var(--font-title); font-size: 1.45rem; font-weight: 700;
+      letter-spacing: 2px; color: var(--text);
+    }
+    .bw-feedback {
+      font-size: 0.98rem; font-weight: 700; color: var(--gold);
+      min-height: 1.5rem; margin-bottom: 0.4rem;
+    }
+    .bw-feedback.win { color: var(--green); }
+    .bw-footnote { font-size: 0.85rem; color: var(--muted); }
+
+    /* Galería de Capturas de Pantalla + Lightbox */
+    .gallery-card {
+      background: rgba(18, 28, 33, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45), 0 0 16px rgba(77, 208, 225, 0.16);
+    }
+    .gallery-thumb {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: radial-gradient(circle at center, #13252e 0%, #091014 100%);
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .gallery-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .gallery-card:hover .gallery-thumb img { transform: scale(1.04); }
+    .gallery-zoom-badge {
+      position: absolute;
+      bottom: 0.55rem;
+      right: 0.55rem;
+      background: rgba(11, 17, 20, 0.84);
+      border: 1px solid rgba(77, 208, 225, 0.45);
+      color: var(--cyan);
+      font-family: var(--font-title);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 4px;
+    }
+    .gallery-fallback {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .gallery-fallback code {
+      color: var(--gold);
+      margin-top: 0.3rem;
+      font-size: 0.84rem;
+    }
+    .gallery-thumb.missing img { display: none; }
+    .gallery-thumb.missing .gallery-fallback { display: flex; }
+    .gallery-meta {
+      padding: 1rem 1.1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      flex: 1;
+    }
+    .gallery-meta h3 {
+      font-size: 1.14rem;
+      color: var(--text);
+      margin: 0;
+    }
+    .gallery-meta p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(6, 10, 13, 0.92);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-inner {
+      position: relative;
+      max-width: 1040px;
+      width: 100%;
+      background: #0e171b;
+      border: 1px solid var(--cyan);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+    }
+    .lightbox-img-wrap {
+      background: #070b0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 74vh;
+    }
+    .lightbox-img-wrap img {
+      max-width: 100%;
+      max-height: 74vh;
+      object-fit: contain;
+      display: block;
+    }
+    .lightbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .lightbox-title {
+      font-family: var(--font-title);
+      font-size: 1.2rem;
+      color: var(--gold);
+    }
+    .lightbox-desc { font-size: 0.86rem; color: var(--muted); }
+    .lightbox-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .lightbox-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.85rem;
+      border-radius: 4px;
+      font-family: var(--font-title);
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+    }
+    .lightbox-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .lightbox-close {
+      background: rgba(242, 107, 85, 0.18);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    /* Métricas de Evaluación */
+    .metric-card {
+      background: rgba(14, 22, 26, 0.92); border: 1px solid var(--border);
+      border-top: 3px solid var(--cyan); border-radius: 8px;
+      padding: 1.25rem; text-align: center;
+    }
+    .metric-val {
+      font-family: var(--font-title); font-size: 2.6rem; font-weight: 700;
+      color: var(--gold); line-height: 1;
+    }
+    .metric-lbl { font-size: 0.88rem; color: var(--muted); margin-top: 0.4rem; }
+
+    /* Tarjetas de Cambios UX */
+    .change-card {
+      background: rgba(18, 28, 33, 0.92); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.55rem;
+    }
+    .change-head {
+      display: flex; align-items: center; gap: 0.65rem;
+      font-family: var(--font-title); font-size: 1.2rem; color: var(--text);
+    }
+    .change-num { flex-shrink: 0; }
+    @media (max-width: 640px) {
+      .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+    .change-num {
+      background: var(--cyan-dim); color: var(--cyan); border: 1px solid var(--cyan);
+      font-size: 0.82rem; padding: 0.12rem 0.45rem; border-radius: 4px;
+    }
+    .change-card p { font-size: 0.88rem; color: var(--muted); }
+    .change-card strong { color: var(--text); }
+    .tags-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.4rem; }
+    .pill {
+      font-size: 0.72rem; padding: 0.18rem 0.55rem; border-radius: 12px;
+      background: #0d1519; border: 1px solid var(--border); color: var(--cyan);
+    }
+
+    /* Mapa Mental Interactivo */
+    .mindmap-controls {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;
+    }
+    .mm-filter {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--muted);
+      padding: 0.45rem 0.9rem; border-radius: 20px; cursor: pointer;
+      font-family: var(--font-title); font-size: 0.92rem; font-weight: 700; letter-spacing: 0.6px;
+      transition: all 0.2s;
+    }
+    .mm-filter.active, .mm-filter:hover {
+      background: var(--cyan); color: #0b1114; border-color: var(--cyan);
+    }
+    .mindmap-canvas {
+      background: rgba(12, 19, 23, 0.94);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.75rem;
+      display: grid;
+      grid-template-columns: 1fr 0.95fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1.25rem;
+      align-items: center;
+    }
+    .mm-center {
+      grid-column: 2; grid-row: 1;
+      width: 245px; height: 245px; margin: 0 auto;
+      border-radius: 50%;
+      background: radial-gradient(circle at top, #1d3a49 0%, #0d1b22 85%);
+      border: 4px solid var(--cyan);
+      box-shadow: 0 0 30px rgba(77, 208, 225, 0.28);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 1.2rem;
+    }
+    .mm-center .mm-tag {
+      font-size: 0.72rem; color: var(--gold); font-weight: 700;
+      letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 0.3rem;
+    }
+    .mm-center h3 { font-size: 1.5rem; color: #fff; line-height: 1.1; margin-bottom: 0.45rem; }
+    .mm-center p { font-size: 0.78rem; color: #9ec5d1; }
+
+    .mm-branch {
+      background: var(--bg-card); border-radius: 10px; overflow: hidden;
+      border: 2px solid var(--accent);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+      align-self: stretch;
+      transition: transform 0.2s, opacity 0.25s, box-shadow 0.2s;
+    }
+    .mm-branch.dimmed { opacity: 0.28; transform: scale(0.98); }
+    .mm-branch.highlighted { box-shadow: 0 0 24px rgba(77, 208, 225, 0.28); transform: translateY(-3px); }
+    .mm-head {
+      background: var(--accent); color: #091014; padding: 0.6rem 0.95rem;
+      font-family: var(--font-title); font-size: 1.12rem; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .mm-body { padding: 0.85rem 0.95rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .mm-node { border-left: 3px solid var(--accent); padding-left: 0.6rem; }
+    .mm-node strong { display: block; font-size: 0.9rem; color: #fff; }
+    .mm-node span { display: block; font-size: 0.8rem; color: var(--muted); line-height: 1.35; }
+
+    .b1 { --accent: var(--sky); grid-column: 1; grid-row: 1; }
+    .b2 { --accent: var(--green); grid-column: 3; grid-row: 1; }
+    .b3 { --accent: var(--purple); grid-column: 1; grid-row: 2; }
+    .b4 { --accent: var(--amber); grid-column: 2; grid-row: 2; }
+    .b5 { --accent: var(--red); grid-column: 3; grid-row: 2; }
+
+    .mm-foot {
+      grid-column: 1 / -1; text-align: center; font-size: 0.8rem; color: var(--muted);
+      border-top: 1px solid var(--border); padding-top: 0.75rem;
+    }
+
+    /* Identidad Visual */
+    .palette-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+      gap: 0.8rem; margin-bottom: 1.5rem;
+    }
+    .swatch {
+      background: rgba(18, 28, 33, 0.92); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; cursor: pointer; text-align: left;
+      transition: transform 0.15s, border-color 0.2s; color: var(--text);
+      font-family: var(--font-body);
+    }
+    .swatch:hover { transform: translateY(-2px); border-color: var(--cyan); }
+    .swatch-color { height: 54px; width: 100%; }
+    .swatch-info { padding: 0.55rem 0.7rem; }
+    .swatch-info strong { display: block; font-size: 0.85rem; }
+    .swatch-info span { font-size: 0.78rem; color: var(--muted); font-family: monospace; }
+
+    /* Bloque Unificado Demo Jugable + Sustentación */
+    .media-hub {
+      background: linear-gradient(135deg, rgba(13, 21, 25, 0.96) 0%, rgba(18, 36, 44, 0.94) 100%);
+      border: 1px solid var(--cyan);
+      border-radius: 12px;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    .demo-hints {
+      display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.1rem;
+      font-size: 0.84rem; color: var(--muted);
+    }
+    .demo-hints span {
+      background: rgba(11, 17, 20, 0.78); border: 1px solid var(--border);
+      padding: 0.3rem 0.65rem; border-radius: 4px;
+    }
+
+    /* Tarjeta de Video como Enlace Normal */
+    .video-card {
+      position: relative; display: block; border-radius: 10px;
+      overflow: hidden; border: 1px solid var(--border); background: #0d161b;
+      aspect-ratio: 16 / 9; transition: transform 0.2s, border-color 0.2s;
+    }
+    .video-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+    .video-card img {
+      width: 100%; height: 100%; object-fit: cover; opacity: 0.78;
+      display: block; transition: opacity 0.2s, transform 0.3s;
+    }
+    .video-card:hover img { opacity: 0.94; transform: scale(1.03); }
+    .video-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(11, 17, 20, 0.92) 0%, rgba(11, 17, 20, 0.25) 55%, rgba(11, 17, 20, 0.15) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1.25rem; text-align: center;
+    }
+    .play-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(242, 107, 85, 0.94); border: 3px solid #ffffff;
+      display: grid; place-items: center; box-shadow: 0 8px 25px rgba(0,0,0,0.55);
+      margin-bottom: 0.75rem; transition: transform 0.2s;
+    }
+    .video-card:hover .play-circle { transform: scale(1.08); }
+    .play-triangle {
+      width: 0; height: 0; margin-left: 5px;
+      border-top: 11px solid transparent; border-bottom: 11px solid transparent;
+      border-left: 19px solid #ffffff;
+    }
+    .video-caption { font-family: var(--font-title); font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .video-sub { font-size: 0.84rem; color: var(--cyan); margin-top: 0.2rem; }
+
+    /* Equipo Profesional (Cuadrícula simétrica 2x2) */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .team-card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(20, 32, 38, 0.95) 0%, rgba(14, 22, 26, 0.94) 100%);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--cyan);
+      border-radius: 10px;
+      padding: 1.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .team-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.5), 0 0 18px rgba(77, 208, 225, 0.14);
+    }
+    .team-top {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(38, 61, 71, 0.75);
+    }
+    .avatar {
+      width: 54px; height: 54px; flex-shrink: 0; border-radius: 50%;
+      background: radial-gradient(circle at top left, rgba(77, 208, 225, 0.28), rgba(11, 17, 20, 0.9));
+      border: 1.5px solid var(--cyan);
+      box-shadow: 0 0 14px rgba(77, 208, 225, 0.22);
+      display: grid; place-items: center; font-family: var(--font-title);
+      font-size: 1.2rem; font-weight: 700; color: var(--cyan);
+    }
+    .team-name { font-family: var(--font-title); font-size: 1.38rem; color: var(--text); line-height: 1.15; }
+    .team-role {
+      font-family: var(--font-title); font-size: 0.9rem; font-weight: 700;
+      letter-spacing: 0.9px; text-transform: uppercase; color: var(--gold); margin-top: 0.2rem;
+    }
+    .team-bio { font-size: 0.93rem; color: var(--muted); line-height: 1.6; }
+    .team-skills {
+      display: flex; flex-wrap: wrap; gap: 0.45rem;
+      margin-top: auto; padding-top: 0.65rem;
+      border-top: 1px dashed rgba(38, 61, 71, 0.55);
+    }
+    @media (max-width: 760px) {
+      .team-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+      background: var(--gold); color: #0b1114; font-weight: 700;
+      padding: 0.6rem 1.1rem; border-radius: 6px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+      opacity: 0; transform: translateY(10px); pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 2.2rem 1.25rem;
+      text-align: center; color: var(--muted); font-size: 0.88rem;
+      background: rgba(7, 11, 14, 0.92);
+    }
+
+    @media (max-width: 960px) {
+      .hero, .media-hub { grid-template-columns: 1fr; min-height: auto; }
+      .grid-4, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .meta-strip { grid-template-columns: repeat(2, 1fr); }
+      .bw-legend { grid-template-columns: repeat(2, 1fr); }
+      .mindmap-canvas { grid-template-columns: 1fr; }
+      .mm-center, .b1, .b2, .b3, .b4, .b5 { grid-column: 1; grid-row: auto; }
+      .menu-toggle { display: block; }
+      nav ul {
+        display: none; flex-direction: column; position: absolute;
+        top: 100%; left: 0; right: 0; background: #0b1114;
+        padding: 1rem; border-bottom: 1px solid var(--border);
+      }
+      nav ul.open { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navegación -->
+  <header>
+    <div class="nav-wrap">
+      <a href="#inicio" class="brand">ALPHA<span>-6</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+      <nav>
+        <ul id="navMenu">
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#videojuego">Videojuego</a></li>
+          <li><a href="#galeria">Galería</a></li>
+          <li><a href="#proceso">Proceso</a></li>
+          <li><a href="#mapa-mental">Mapa UX/UI</a></li>
+          <li><a href="#identidad">Identidad</a></li>
+          <li><a href="#demo">Demo y Video</a></li>
+          <li><a href="#equipo">Equipo</a></li>
+          <li>
+            <a class="nav-demo-btn" target="_blank" rel="noopener"
+               href="https://unadvirtualedu-my.sharepoint.com/:u:/g/personal/epulidoag_unadvirtual_edu_co/IQDL2iOSlsYRSah9YkJnXtrnAbHEEXp-21IMBBUENwwult8?e=BWeQnh">
+              Jugar Demo →
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 1. Inicio (Hero con Estación Espacial de fondo y Protagonista ALPHA-6) -->
+  <div class="hero-banner">
+    <section id="inicio" class="hero">
+      <div>
+        <div class="sector-pill">
+          <span class="sector-dot" aria-hidden="true"></span>
+          <span>SECTOR GAMMA · AÑO 2642</span>
+        </div>
+        <h1 class="hero-title">ALPHA<span class="num-accent">-6</span></h1>
+        <div class="hero-subtitle-wrap">
+          <span class="hero-sub-bar" aria-hidden="true"></span>
+          <div class="hero-sub">Protocolo de Fuga</div>
+        </div>
+        <p class="lead">
+          Un autómata despierta con el núcleo de energía fracturado y una sola directiva grabada en el metal: salir.
+          Explora la penumbra, encuentra 5 celdas de energía y no dejes que la batería llegue a cero.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://unadvirtualedu-my.sharepoint.com/:u:/g/personal/epulidoag_unadvirtual_edu_co/IQDL2iOSlsYRSah9YkJnXtrnAbHEEXp-21IMBBUENwwult8?e=BWeQnh">
+            Jugar Demo →
+          </a>
+          <a href="#galeria" class="btn btn-secondary">Ver Galería</a>
+          <a href="#mapa-mental" class="btn btn-cyan">Mapa Mental UX/UI</a>
+        </div>
+
+        <div class="meta-strip">
+          <div class="meta-item"><span>Género</span><strong>Acción y exploración</strong></div>
+          <div class="meta-item"><span>Plataforma</span><strong>PC · Windows / macOS</strong></div>
+          <div class="meta-item"><span>Motor</span><strong>Unity 6 (URP)</strong></div>
+          <div class="meta-item"><span>Público</span><strong>16 a 35 años</strong></div>
+        </div>
+      </div>
+
+      <!-- Protagonista ALPHA-6 adaptado + Bitácora -->
+      <div class="hero-visual">
+        <div class="hero-character-frame">
+          <img src="alpha6.jpg" alt="Autómata ALPHA-6 en el corredor industrial del Sector Gamma" />
+          <div class="hero-char-overlay">
+            <span class="char-badge">UNIDAD ALPHA-6</span>
+            <span class="char-status">NÚCLEO FRACTURADO</span>
+          </div>
+        </div>
+
+        <div class="log-box" aria-live="polite">
+          <div class="log-header">
+            <span>BITÁCORA DE ALPHA-6</span>
+            <span id="logCounter">1 de 5</span>
+          </div>
+          <div class="log-chapter" id="logTitle"></div>
+          <p id="logText" style="font-size: 0.89rem; color: var(--text);"></p>
+          <div class="log-controls">
+            <button id="prevLog" aria-label="Capítulo anterior">&lt; Anterior</button>
+            <button id="nextLog" aria-label="Capítulo siguiente">Siguiente &gt;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 2. Diseño de Videojuego · Framework MDA (Sección completa restaurada + Juega con la batería) -->
+  <section id="videojuego">
+    <div class="section-tag">DISEÑO DE VIDEOJUEGO · FRAMEWORK MDA</div>
+    <h2>Sobre ALPHA-6: Protocolo de Fuga</h2>
+    <p class="lead">
+      Un autómata industrial despierta décadas después del colapso energético del Sector Gamma con su núcleo fracturado
+      y una sola directiva activa: recuperar 5 celdas de energía antes de apagarse para siempre.
+    </p>
+
+    <div class="grid-3">
+      <article class="card">
+        <span class="badge">Narrativa</span>
+        <h3>El Despertar en Sector Gamma</h3>
+        <p>
+          Confinado bajo capas de titanio en una estación espacial clausurada en el año 2642, ALPHA-6 se reactiva
+          tras una chispa anómala. Sin armas ni conexión a la red central, su chasis y su lectura táctica del entorno
+          son su única vía de escape.
+        </p>
+      </article>
+
+      <article class="card">
+        <span class="badge">Mecánicas (MDA)</span>
+        <h3>Exploración y Gestión Vital</h3>
+        <ul>
+          <li><strong>Movimiento:</strong> tercera persona con desplazamiento relativo a la cámara.</li>
+          <li><strong>Supervivencia:</strong> drenaje continuo de batería calibrado a 0.2/s.</li>
+          <li><strong>Objetivo:</strong> recolectar 5 de las 8 celdas guiadas por luz cian (+40 energía c/u).</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <span class="badge">Público y Plataforma</span>
+        <h3>Perfil del Jugador</h3>
+        <p>
+          Dirigido a jugadores de <strong>16 a 35 años</strong> aficionados a la ciencia ficción industrial,
+          la gestión de recursos bajo presión y las atmósferas opresivas. Compilado para PC (Windows/macOS) con
+          Unity 6 (6000.0 LTS), Shader Graph y Blender.
+        </p>
+      </article>
+    </div>
+
+    <div class="grid-2" style="margin-top: 1.4rem;">
+      <div class="card">
+        <h3>Esquema de Controles Estándar</h3>
+        <p>Diseñado bajo la Ley de Jakob y las heurísticas de control y libertad del usuario:</p>
+        <div class="keys-row">
+          <div class="key-item"><kbd>WASD</kbd> Mover</div>
+          <div class="key-item"><kbd>SHIFT</kbd> Correr</div>
+          <div class="key-item"><kbd>ESPACIO</kbd> Saltar</div>
+          <div class="key-item"><kbd>E</kbd> Recoger celda</div>
+          <div class="key-item"><kbd>ESC</kbd> Pausa</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Condiciones de Resolución</h3>
+        <ul>
+          <li><strong>Victoria:</strong> al recuperar la 5.ª celda se despliega el Panel de Victoria con rango dinámico (<strong>S, A, B o C</strong>) según la energía restante.</li>
+          <li><strong>Derrota:</strong> si la energía llega a 0%, se activa el colapso mecánico con opción de <strong>Reintento inmediato</strong> o retorno al menú.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Juega con la batería (Interactivo) -->
+    <div class="battery-widget" id="bateria">
+      <h3 class="bw-title">Juega con la batería</h3>
+      <p class="bw-desc">
+        Esta es la barra de energía del juego. Pulsa «Iniciar prueba» para que empiece a bajar y luego «Recoger celda» (o la tecla <strong>E</strong>) para recargarla. Con 5 celdas ganas; si llega a 0, pierdes.
+      </p>
+
+      <div class="bw-status-row">
+        <span class="bw-state" id="bwState">ÓPTIMA</span>
+        <span class="bw-pct"><span id="bwPct">100</span><small>%</small></span>
+      </div>
+
+      <div class="bw-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="bwTrack">
+        <div class="bw-fill" id="bwFill"></div>
+      </div>
+
+      <div class="bw-legend">
+        <div class="bw-leg-item" style="--leg-color: var(--green);">
+          <strong>ÓPTIMA</strong>
+          <span>más de 75%</span>
+        </div>
+        <div class="bw-leg-item" style="--leg-color: var(--gold);">
+          <strong>ESTABLE</strong>
+          <span>50 a 75%</span>
+        </div>
+        <div class="bw-leg-item" style="--leg-color: var(--amber);">
+          <strong>BAJA</strong>
+          <span>25 a 50%</span>
+        </div>
+        <div class="bw-leg-item" style="--leg-color: var(--red);">
+          <strong>CRÍTICA</strong>
+          <span>menos de 25%</span>
+        </div>
+      </div>
+
+      <div class="bw-actions-row">
+        <div class="bw-btns">
+          <button class="bw-btn-collect" id="bwCollectBtn">
+            <span class="bw-keycap">E</span>
+            <span>RECOGER CELDA</span>
+          </button>
+          <button class="bw-btn-reset" id="bwResetBtn">INICIAR PRUEBA</button>
+        </div>
+        <div class="bw-cells" id="bwCells">CELDAS 0 / 5</div>
+      </div>
+
+      <div class="bw-feedback" id="bwFeedback" aria-live="polite"></div>
+      <p class="bw-footnote">
+        Es una muestra para entender la barra, no la partida real. Según la energía que te quede, la barra cambia de color y de nombre.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3. Galería de Capturas del Gameplay -->
+  <section id="galeria">
+    <div class="section-tag">02 · GALERÍA DEL GAMEPLAY</div>
+    <h2>Capturas de Pantalla de la Demo Mejorada</h2>
+    <p class="lead">
+      Recorrido visual por las pantallas clave de <strong>ALPHA-6: Protocolo de Fuga</strong> en Unity 6 (URP). Haz clic en cualquier captura para ampliarla y navegar con las flechas del teclado.
+    </p>
+
+    <div class="grid-3" id="galleryGrid">
+      <article class="gallery-card" data-idx="0" tabindex="0" role="button" aria-label="Ampliar captura 01: Pantalla de arranque y menú">
+        <div class="gallery-thumb">
+          <img src="01_inicio.png" alt="Pantalla de arranque y menú principal de ALPHA-6" loading="lazy" />
+          <div class="gallery-fallback"><span>Captura pendiente en la carpeta:</span><code>01_inicio.png</code></div>
+          <span class="gallery-zoom-badge">Ampliar ↗</span>
+        </div>
+        <div class="gallery-meta">
+          <h3>01 · Pantalla de Arranque y Menú</h3>
+          <p>Identidad visual renovada con logo de ALPHA-6, tipografía Rajdhani Bold y navegación directa.</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-idx="1" tabindex="0" role="button" aria-label="Ampliar captura 02: Escena narrativa inicial y briefing">
+        <div class="gallery-thumb">
+          <img src="02_narrativa.png" alt="Escena narrativa inicial y briefing de misión en Sector Gamma" loading="lazy" />
+          <div class="gallery-fallback"><span>Captura pendiente en la carpeta:</span><code>02_narrativa.png</code></div>
+          <span class="gallery-zoom-badge">Ampliar ↗</span>
+        </div>
+        <div class="gallery-meta">
+          <h3>02 · Narrativa y Briefing de Misión</h3>
+          <p>Contexto del Sector Gamma e instrucciones iniciales con alto contraste accesible (WCAG 1.4.3).</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-idx="2" tabindex="0" role="button" aria-label="Ampliar captura 03: Exploración en Sector Gamma">
+        <div class="gallery-thumb">
+          <img src="03_exploracion.png" alt="ALPHA-6 explorando los corredores del Sector Gamma con luces guía cian" loading="lazy" />
+          <div class="gallery-fallback"><span>Captura pendiente en la carpeta:</span><code>03_exploracion.png</code></div>
+          <span class="gallery-zoom-badge">Ampliar ↗</span>
+        </div>
+        <div class="gallery-meta">
+          <h3>03 · Exploración y Luces Guía Cian</h3>
+          <p>Entorno 3D industrial en Unity 6 (URP) con haces verticales y halos cian sobre cada celda.</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-idx="3" tabindex="0" role="button" aria-label="Ampliar captura 04: HUD multimodal e interacción con celda">
+        <div class="gallery-thumb">
+          <img src="04_hud_celda.png" alt="Aviso contextual E Recoger celda y HUD multimodal de energía" loading="lazy" />
+          <div class="gallery-fallback"><span>Captura pendiente en la carpeta:</span><code>04_hud_celda.png</code></div>
+          <span class="gallery-zoom-badge">Ampliar ↗</span>
+        </div>
+        <div class="gallery-meta">
+          <h3>04 · HUD Multimodal e Interacción</h3>
+          <p>Aviso dinámico «E · Recoger celda» a menos de 4 m, estado escrito de energía y contador de celdas.</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-idx="4" tabindex="0" role="button" aria-label="Ampliar captura 05: Menú de pausa">
+        <div class="gallery-thumb">
+          <img src="05_pausa.png" alt="Menú de pausa activado con la tecla Esc durante la partida" loading="lazy" />
+          <div class="gallery-fallback"><span>Captura pendiente en la carpeta:</span><code>05_pausa.png</code></div>
+          <span class="gallery-zoom-badge">Ampliar ↗</span>
+        </div>
+        <div class="gallery-meta">
+          <h3>05 · Menú de Pausa (Tecla Esc)</h3>
+          <p>Control y libertad del usuario para pausar el drenaje de energía y retomar la misión sin fricción.</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-idx="5" tabindex="0" role="button" aria-label="Ampliar captura 06: Pantalla de victoria y rangos">
+        <div class="gallery-thumb">
+          <img src="06_victoria.png" alt="Pantalla de victoria con rango dinámico S, A, B o C" loading="lazy" />
+          <div class="gallery-fallback"><span>Captura pendiente en la carpeta:</span><code>06_victoria.png</code></div>
+          <span class="gallery-zoom-badge">Ampliar ↗</span>
+        </div>
+        <div class="gallery-meta">
+          <h3>06 · Resolución y Sistema de Rangos</h3>
+          <p>Cierre del Protocolo de Fuga con calificación dinámica (S–C) según la batería restante y opción de reintento.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 4. Proceso de Desarrollo, Métricas y Cambios UX -->
+  <section id="proceso">
+    <div class="section-tag">03 · PROCESO DE DISEÑO Y EVALUACIÓN</div>
+    <h2>Del prototipo inicial a la demo mejorada</h2>
+    <p class="lead">
+      El juego evolucionó a partir de un ciclo real de diseño centrado en el usuario: análisis de referentes (Tarea 1),
+      prototipo en Unity y pruebas con 5 evaluadores (Tarea 2) e iteración técnica y visual documentada (Tarea 3).
+    </p>
+
+    <div class="grid-4" style="margin-bottom: 2rem;">
+      <div class="metric-card">
+        <div class="metric-val">5</div>
+        <div class="metric-lbl">Usuarios reales evaluaron el prototipo</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">100%</div>
+        <div class="metric-lbl">Encontró el menú inicial «muy fácil»</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">60%</div>
+        <div class="metric-lbl">Tuvo fricción al recoger celdas sin aviso</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">80%</div>
+        <div class="metric-lbl">Reportó haberse divertido «mucho»</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <article class="change-card">
+        <div class="change-head"><span class="change-num">01</span> Aviso para recoger celdas</div>
+        <p><strong>Problema:</strong> 3 de 5 usuarios dudaron frente a las celdas y perdieron batería.</p>
+        <p><strong>Cambio:</strong> Al acercarse a menos de 4 m aparece «E · Recoger celda» y se oculta al alejarse.</p>
+        <div class="tags-row"><span class="pill">Nielsen · Reconocimiento</span><span class="pill">Ley de Fitts</span></div>
+      </article>
+
+      <article class="change-card">
+        <div class="change-head"><span class="change-num">02</span> Balance de energía</div>
+        <p><strong>Problema:</strong> La batería caía demasiado rápido para jugadores nuevos.</p>
+        <p><strong>Cambio:</strong> Drenaje reducido a la mitad (<code>0.2</code>) y recarga duplicada a <code>+40</code> por celda.</p>
+        <div class="tags-row"><span class="pill">Curva de dificultad</span><span class="pill">Control del usuario</span></div>
+      </article>
+
+      <article class="change-card">
+        <div class="change-head"><span class="change-num">03</span> Luces guía en el nivel</div>
+        <p><strong>Problema:</strong> En corredores oscuros, las celdas se confundían con el metal del entorno.</p>
+        <p><strong>Cambio:</strong> Haz vertical y halo cian de pulso lento sobre cada celda sin parpadeos bruscos.</p>
+        <div class="tags-row"><span class="pill">Affordance visual</span><span class="pill">WCAG 2.3.1</span></div>
+      </article>
+
+      <article class="change-card">
+        <div class="change-head"><span class="change-num">04</span> HUD multimodal</div>
+        <p><strong>Problema:</strong> La barra solo comunicaba el estado mediante color.</p>
+        <p><strong>Cambio:</strong> Etiquetas escritas (Óptima, Estable, Baja, Crítica) + contador de celdas.</p>
+        <div class="tags-row"><span class="pill">Visibilidad del estado</span><span class="pill">WCAG 1.4.1</span></div>
+      </article>
+
+      <article class="change-card">
+        <div class="change-head"><span class="change-num">05</span> Pausa, ayuda y cierre</div>
+        <p><strong>Problema:</strong> Faltaba pausa, recordatorio de controles y reintento en derrota.</p>
+        <p><strong>Cambio:</strong> Menú con <code>Esc</code>, briefing inicial, derrota con reintento y rangos S–C.</p>
+        <div class="tags-row"><span class="pill">Control y libertad</span><span class="pill">Ley de Hick</span></div>
+      </article>
+
+      <article class="change-card">
+        <div class="change-head"><span class="change-num">06</span> Arranque e identidad</div>
+        <p><strong>Problema:</strong> El menú era un bloque estático y la voz arrancaba sobre el logo.</p>
+        <p><strong>Cambio:</strong> Splash saltable con logo, 5 escenas ilustradas sincronizadas con voz y tipografía legible.</p>
+        <div class="tags-row"><span class="pill">WCAG 1.4.3</span><span class="pill">Benchmark Dead Space</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 4. Mapa Mental Interactivo UX/UI -->
+  <section id="mapa-mental">
+    <div class="section-tag">04 · BASE CONCEPTUAL (DISEÑO UX/UI)</div>
+    <h2>Mapa Mental: Diseño UX/UI Aplicado a la Web</h2>
+    <p class="lead">
+      Síntesis de los principios teóricos del curso <em>Introducción teórica al Diseño UX/UI</em> y los referentes de la unidad que fundamentan cada decisión de este portafolio. Usa los filtros para destacar cada eje.
+    </p>
+
+    <div class="mindmap-controls" role="group" aria-label="Filtros del mapa mental">
+      <button class="mm-filter active" data-branch="all">Ver todo</button>
+      <button class="mm-filter" data-branch="b1">1. UX</button>
+      <button class="mm-filter" data-branch="b2">2. Usabilidad</button>
+      <button class="mm-filter" data-branch="b3">3. Jerarquía Visual</button>
+      <button class="mm-filter" data-branch="b4">4. Interacción</button>
+      <button class="mm-filter" data-branch="b5">5. Patrones y Responsivo</button>
+    </div>
+
+    <div class="mindmap-canvas">
+      <article class="mm-branch b1" data-id="b1">
+        <div class="mm-head">1. Experiencia de Usuario (UX)</div>
+        <div class="mm-body">
+          <div class="mm-node">
+            <strong>Diseño Centrado en el Usuario</strong>
+            <span>Responde a las necesidades y objetivos reales del visitante del portafolio web.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Planos de Garrett (2011)</strong>
+            <span>Estrategia, alcance, estructura, esqueleto y superficie para ordenar la información.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Diferencia UX vs. UI (Saza, 2019)</strong>
+            <span>UX abarca la vivencia integral y utilidad; UI concreta el medio visual e interactivo.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Validación Continua</strong>
+            <span>Evaluación con usuarios y pruebas en navegadores para eliminar fricciones.</span>
+          </div>
+        </div>
+      </article>
+
+      <div class="mm-center">
+        <div class="mm-tag">Base Conceptual Web</div>
+        <h3>Diseño UX/UI<br />Aplicado a la Web</h3>
+        <p>Curso Introducción teórica al Diseño UX/UI (Udemy) · Proyecto ALPHA-6</p>
+      </div>
+
+      <article class="mm-branch b2" data-id="b2">
+        <div class="mm-head">2. Usabilidad y Navegación</div>
+        <div class="mm-body">
+          <div class="mm-node">
+            <strong>Navegación Intuitiva (Krug, 2014)</strong>
+            <span>Principio "No me hagas pensar": menús claros, etiquetas directas y flujo predecible.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Simplicidad (Sullivan, 2000)</strong>
+            <span>Eliminar ruido visual y reducir la carga cognitiva en cada sección.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Arquitectura de Información</strong>
+            <span>Agrupación lógica de contenidos (Inicio, Videojuego, Proceso, Mapa, Identidad, Demo, Equipo).</span>
+          </div>
+          <div class="mm-node">
+            <strong>Accesibilidad (WCAG)</strong>
+            <span>Contraste legible, foco visible en teclado y estados multimodales (color + texto).</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="mm-branch b3" data-id="b3">
+        <div class="mm-head">3. Jerarquía Visual (UI)</div>
+        <div class="mm-body">
+          <div class="mm-node">
+            <strong>Escala y Tipografía</strong>
+            <span>Contraste entre titulares (Rajdhani) y cuerpo de texto (Exo 2) para lectura ágil.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Color e Identidad</strong>
+            <span>Paleta oscura sci-fi con acentos cian y dorado coherente con ALPHA-6.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Espaciado y Leyes Gestalt</strong>
+            <span>Proximidad y agrupación en tarjetas para separar módulos sin saturar la pantalla.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="mm-branch b4" data-id="b4">
+        <div class="mm-head">4. Interacción y Feedback</div>
+        <div class="mm-body">
+          <div class="mm-node">
+            <strong>Affordance Visual (Grant, 2022)</strong>
+            <span>Botones, enlaces, filtros y barra interactiva comunican visualmente su función.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Retroalimentación Inmediata</strong>
+            <span>Prueba de batería en tiempo real, avisos al copiar colores y bitácora navegable.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Control del Usuario</strong>
+            <span>Permite explorar libremente, reiniciar pruebas y navegar con teclado o ratón.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="mm-branch b5" data-id="b5">
+        <div class="mm-head">5. Patrones y Diseño Responsivo</div>
+        <div class="mm-body">
+          <div class="mm-node">
+            <strong>Patrones de Diseño Web</strong>
+            <span>Convenciones reconocibles: barra fija superior, hero con CTA, rejilla y footer.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Diseño Adaptativo (Thornsby, 2016)</strong>
+            <span>Rejillas flexibles y media queries que adaptan la interfaz a móvil y escritorio.</span>
+          </div>
+          <div class="mm-node">
+            <strong>Compatibilidad Multi-navegador</strong>
+            <span>Verificación funcional de enlaces, video y diseño en al menos dos navegadores.</span>
+          </div>
+        </div>
+      </article>
+
+      <div class="mm-foot">
+        Fuentes: Fierro &amp; Cañas (s.f., Udemy); Garrett (2011); Grant (2022); Krug (2014); Saza (2019); Sullivan (2000); Thornsby (2016).
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Identidad Visual -->
+  <section id="identidad">
+    <div class="section-tag">05 · LÍNEA GRÁFICA UNIFICADA</div>
+    <h2>Identidad Visual del Juego y del Sitio</h2>
+    <p class="lead">
+      Los mismos colores y tipografías viven en el HUD de Unity y en este portafolio. Haz clic en cualquier color para copiar su código hexadecimal.
+    </p>
+
+    <div class="palette-grid">
+      <button class="swatch" data-hex="#0B1114">
+        <div class="swatch-color" style="background:#0B1114;"></div>
+        <div class="swatch-info"><strong>Fondo</strong><span>#0B1114</span></div>
+      </button>
+      <button class="swatch" data-hex="#162329">
+        <div class="swatch-color" style="background:#162329;"></div>
+        <div class="swatch-info"><strong>Panel</strong><span>#162329</span></div>
+      </button>
+      <button class="swatch" data-hex="#263D47">
+        <div class="swatch-color" style="background:#263D47;"></div>
+        <div class="swatch-info"><strong>Borde</strong><span>#263D47</span></div>
+      </button>
+      <button class="swatch" data-hex="#4DD0E1">
+        <div class="swatch-color" style="background:#4DD0E1;"></div>
+        <div class="swatch-info"><strong>Cian Guía</strong><span>#4DD0E1</span></div>
+      </button>
+      <button class="swatch" data-hex="#E3C84A">
+        <div class="swatch-color" style="background:#E3C84A;"></div>
+        <div class="swatch-info"><strong>Acción (CTA)</strong><span>#E3C84A</span></div>
+      </button>
+      <button class="swatch" data-hex="#6DB85B">
+        <div class="swatch-color" style="background:#6DB85B;"></div>
+        <div class="swatch-info"><strong>Óptima</strong><span>#6DB85B</span></div>
+      </button>
+      <button class="swatch" data-hex="#F09A3E">
+        <div class="swatch-color" style="background:#F09A3E;"></div>
+        <div class="swatch-info"><strong>Baja</strong><span>#F09A3E</span></div>
+      </button>
+      <button class="swatch" data-hex="#F26B55">
+        <div class="swatch-color" style="background:#F26B55;"></div>
+        <div class="swatch-info"><strong>Crítica</strong><span>#F26B55</span></div>
+      </button>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <span class="badge">Tipografía de Títulos y Botones</span>
+        <h3 style="font-size: 1.75rem; color: var(--text);">Rajdhani Bold · PROTOCOLO DE FUGA</h3>
+        <p>Geométrica y condensada, diseñada para lectura rápida en HUD, titulares y botones de acción.</p>
+      </div>
+      <div class="card">
+        <span class="badge">Tipografía de Lectura</span>
+        <h3 style="font-family: var(--font-body); font-size: 1.35rem; color: var(--text);">Exo 2 Regular · Lectura clara en pantallas oscuras</h3>
+        <p>Un solo color amarillo por vista marca la acción principal y el color nunca es la única señal de estado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Bloque Unificado: Demo Jugable y Sustentación -->
+  <section id="demo">
+    <div class="section-tag">06 · DEMO JUGABLE Y SUSTENTACIÓN</div>
+    <h2>Despierta a ALPHA-6</h2>
+
+    <div class="media-hub">
+      <div>
+        <h3 style="font-size: 1.65rem; color: var(--text); margin-bottom: 0.65rem;">
+          Prueba la Demo Jugable Mejorada
+        </h3>
+        <p style="color: var(--muted); font-size: 0.96rem;">
+          La demo incluye la pantalla de arranque, la introducción narrada en 5 escenas y el nivel completo del Sector Gamma:
+          cinco celdas de energía, una batería que no perdona y el camino a la superficie.
+        </p>
+
+        <div class="cta-row">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://unadvirtualedu-my.sharepoint.com/:u:/g/personal/epulidoag_unadvirtual_edu_co/IQDL2iOSlsYRSah9YkJnXtrnAbHEEXp-21IMBBUENwwult8?e=BWeQnh">
+            Jugar Demo →
+          </a>
+          <a class="btn btn-secondary" target="_blank" rel="noopener"
+             href="https://youtu.be/GdvooOZS5yw">
+            Video Fase 2 (YouTube)
+          </a>
+        </div>
+
+        <div class="demo-hints">
+          <span>Teclado y ratón</span>
+          <span>Activa el sonido (narración con voz)</span>
+          <span>Descomprimir y ejecutar .exe</span>
+        </div>
+      </div>
+
+      <a class="video-card" href="https://youtu.be/upvKzbUMj48" target="_blank" rel="noopener"
+         aria-label="Ver sustentación en inglés de ALPHA-6 en YouTube">
+        <img src="https://img.youtube.com/vi/upvKzbUMj48/hqdefault.jpg"
+             alt="Miniatura de la sustentación en inglés y demo en vivo de ALPHA-6" />
+        <div class="video-overlay">
+          <div class="play-circle"><div class="play-triangle"></div></div>
+          <div class="video-caption">Sustentación en Inglés y Demo en Vivo</div>
+          <div class="video-sub">Abrir video en YouTube ↗</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 7. Equipo de Desarrollo -->
+  <section id="equipo">
+    <div class="section-tag">07 · EQUIPO DE DESARROLLO</div>
+    <h2>Créditos y Roles del Proyecto</h2>
+    <p class="lead">
+      Equipo multidisciplinario de Ingeniería Multimedia encargado de la conceptualización, desarrollo en Unity 6, evaluación UX/UI y despliegue web de ALPHA-6.
+    </p>
+
+    <div class="team-grid">
+      <article class="team-card">
+        <div class="team-top">
+          <div class="avatar">EP</div>
+          <div>
+            <div class="team-name">Ernesto Pulido Aguirre</div>
+            <div class="team-role">Product Lead · Arquitectura de Sistemas y Desarrollo Web</div>
+          </div>
+        </div>
+        <p class="team-bio">
+          Lideró la estructuración integral del proyecto, la narrativa del Sector Gamma y la arquitectura de información. Coordinó la consolidación de la documentación técnica, el mapa conceptual UX/UI y la implementación front-end del portafolio web interactivo.
+        </p>
+        <div class="team-skills">
+          <span class="pill">Arquitectura de Información</span>
+          <span class="pill">Diseño Narrativo</span>
+          <span class="pill">HTML5 / CSS3 / JS</span>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-top">
+          <div class="avatar">GJ</div>
+          <div>
+            <div class="team-name">Geraldine Joya Prieto</div>
+            <div class="team-role">Gameplay Programmer · Unity 6 &amp; Technical Artist</div>
+          </div>
+        </div>
+        <p class="team-bio">
+          Responsable de la programación en C# dentro de Unity 6 (URP), integración de controladores de movimiento y detección de proximidad, implementación de luces guía cian en el nivel, empaquetado de la demo jugable y demostración técnica en vivo.
+        </p>
+        <div class="team-skills">
+          <span class="pill">Unity 6 (URP)</span>
+          <span class="pill">C# Scripting</span>
+          <span class="pill">Level &amp; Lighting</span>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-top">
+          <div class="avatar">HC</div>
+          <div>
+            <div class="team-name">Harrison Michel Castillo Correa</div>
+            <div class="team-role">UX/UI Designer · Balance de Sistemas y Accesibilidad</div>
+          </div>
+        </div>
+        <p class="team-bio">
+          Diseñó la arquitectura del HUD multimodal bajo estándares WCAG (contraste y estados escritos), calibró la curva de dificultad de drenaje y recarga energética, e implementó los flujos de pausa, recuperación de errores y asignación dinámica de rangos (S–C).
+        </p>
+        <div class="team-skills">
+          <span class="pill">Diseño de HUD</span>
+          <span class="pill">Balance de Mecánicas</span>
+          <span class="pill">Accesibilidad WCAG</span>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-top">
+          <div class="avatar">SS</div>
+          <div>
+            <div class="team-name">Shara Karley Sánchez Arbelaez</div>
+            <div class="team-role">Visual Designer · UX Research &amp; Benchmarking</div>
+          </div>
+        </div>
+        <p class="team-bio">
+          Dirigió la línea gráfica y las señales visuales de interacción (<em>affordances</em> y feedback diegético), condujo el análisis comparativo internacional tomando a <em>Dead Space</em> como referente AAA y sintetizó los hallazgos de las pruebas heurísticas con usuarios reales.
+        </p>
+        <div class="team-skills">
+          <span class="pill">Identidad Visual</span>
+          <span class="pill">UX Research</span>
+          <span class="pill">Benchmarking AAA</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>ALPHA-6: Protocolo de Fuga</strong> · Portafolio Interactivo</p>
+    <p style="margin-top:0.25rem;">Grupo 213030_52 · Ingeniería Multimedia · Curso Diseño Interactivo · Tutor: Andrés Leonardo Duran Vivas · UNAD (2026)</p>
+    <p style="margin-top:0.35rem; font-size:0.8rem;">Desarrollado en Unity 6 (URP) y HTML5 / CSS3 / JavaScript · Tipografías Rajdhani y Exo 2 (SIL OFL).</p>
+  </footer>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Visor de capturas de pantalla">
+    <div class="lightbox-inner">
+      <div class="lightbox-img-wrap">
+        <img id="lbImg" src="" alt="" />
+      </div>
+      <div class="lightbox-bar">
+        <div>
+          <div class="lightbox-title" id="lbTitle"></div>
+          <div class="lightbox-desc" id="lbDesc"></div>
+        </div>
+        <div class="lightbox-nav">
+          <span id="lbCounter" style="font-family:var(--font-title); color:var(--cyan); margin-right:0.35rem;">1 / 6</span>
+          <button class="lightbox-btn" id="lbPrev" aria-label="Captura anterior">&lt; Anterior</button>
+          <button class="lightbox-btn" id="lbNext" aria-label="Captura siguiente">Siguiente &gt;</button>
+          <button class="lightbox-btn lightbox-close" id="lbClose" aria-label="Cerrar visor">Cerrar ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Menú móvil
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
+    menuToggle.addEventListener('click', () => navMenu.classList.toggle('open'));
+    navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navMenu.classList.remove('open')));
+
+    // Bitácora narrativa interactiva (5 capítulos)
+    const logs = [
+      { title: 'Capítulo 01 · Clausura', text: 'En el año 2642, la inmensa instalación de manufactura automatizada «Sector Gamma» fue clausurada de emergencia tras un colapso en la red de energía central.' },
+      { title: 'Capítulo 02 · Letargo', text: 'En las entrañas oscuras de aquel coloso de metal, el autómata ALPHA-6 quedó confinado en un letargo eterno, sepultado bajo capas de titanio y olvido.' },
+      { title: 'Capítulo 03 · Despertar', text: 'Una chispa errante reactiva sus servomotores, pero el diagnóstico es implacable: su núcleo de energía está fracturado y solo conserva una directiva: ejecutar el «Protocolo de Fuga».' },
+      { title: 'Capítulo 04 · Confinamiento', text: 'Rodeado de tornos oxidados y brazos hidráulicos inmóviles, sin armas ni conexión a la red, su única ventaja es su chasis de acero para interactuar con los sistemas obsoletos.' },
+      { title: 'Capítulo 05 · Fuga', text: 'Deberá explorar la penumbra y recolectar 5 celdas de energía guiadas por luz cian para evitar el apagado total. Cada voltio cuenta para alcanzar la superficie.' }
+    ];
+    let logIdx = 0;
+    const logTitle = document.getElementById('logTitle');
+    const logText = document.getElementById('logText');
+    const logCounter = document.getElementById('logCounter');
+    function renderLog() {
+      logTitle.textContent = logs[logIdx].title;
+      logText.textContent = logs[logIdx].text;
+      logCounter.textContent = `${logIdx + 1} de ${logs.length}`;
+    }
+    document.getElementById('prevLog').addEventListener('click', () => {
+      logIdx = (logIdx - 1 + logs.length) % logs.length; renderLog();
+    });
+    document.getElementById('nextLog').addEventListener('click', () => {
+      logIdx = (logIdx + 1) % logs.length; renderLog();
+    });
+    renderLog();
+
+    // JUEGA CON LA BATERÍA (Barra interactiva)
+    const bwState = document.getElementById('bwState');
+    const bwPct = document.getElementById('bwPct');
+    const bwFill = document.getElementById('bwFill');
+    const bwTrack = document.getElementById('bwTrack');
+    const bwCollectBtn = document.getElementById('bwCollectBtn');
+    const bwResetBtn = document.getElementById('bwResetBtn');
+    const bwCells = document.getElementById('bwCells');
+    const bwFeedback = document.getElementById('bwFeedback');
+
+    let energy = 100;
+    let cells = 0;
+    let started = false;
+    let gameOver = false;
+    let drainInterval = null;
+
+    function renderBattery() {
+      const pct = Math.max(0, Math.round(energy));
+      bwPct.textContent = pct;
+      bwFill.style.width = `${pct}%`;
+      bwTrack.setAttribute('aria-valuenow', pct);
+      bwCells.textContent = `CELDAS ${cells} / 5`;
+
+      let label = 'ÓPTIMA';
+      let color = '#6db85b';
+      if (pct < 25) { label = 'CRÍTICA'; color = '#f26b55'; }
+      else if (pct < 50) { label = 'BAJA'; color = '#f09a3e'; }
+      else if (pct <= 75) { label = 'ESTABLE'; color = '#e3c84a'; }
+
+      bwState.textContent = label;
+      bwState.style.color = color;
+      bwFill.style.backgroundColor = color;
+    }
+
+    function startDrain() {
+      clearInterval(drainInterval);
+      drainInterval = setInterval(() => {
+        if (!started || gameOver) return;
+        energy = Math.max(0, energy - 0.45);
+        renderBattery();
+        if (energy <= 0) {
+          started = false;
+          gameOver = true;
+          clearInterval(drainInterval);
+          bwCollectBtn.disabled = true;
+          bwResetBtn.textContent = 'INICIAR PRUEBA';
+          bwFeedback.className = 'bw-feedback';
+          bwFeedback.textContent = 'Sistemas apagados. Pulsa «Iniciar prueba» para intentarlo otra vez.';
+        }
+      }, 250);
+    }
+
+    function collectCell() {
+      if (!started || gameOver) return;
+      cells++;
+      energy = Math.min(100, energy + 40);
+      renderBattery();
+      if (cells >= 5) {
+        started = false;
+        gameOver = true;
+        clearInterval(drainInterval);
+        bwCollectBtn.disabled = true;
+        bwResetBtn.textContent = 'INICIAR PRUEBA';
+        const pct = Math.round(energy);
+        const rank = pct > 75 ? 'S' : pct >= 50 ? 'A' : pct >= 25 ? 'B' : 'C';
+        bwFeedback.className = 'bw-feedback win';
+        bwFeedback.textContent = `Protocolo completado con ${pct}% de energía. Rango obtenido: ${rank}.`;
+      } else {
+        bwFeedback.className = 'bw-feedback';
+        bwFeedback.textContent = `Celda ${cells} recogida (+40% de energía). Te faltan ${5 - cells}.`;
+      }
+    }
+
+    function initBatteryIdle(message = 'Pulsa «Iniciar prueba» para activar el drenaje de energía.') {
+      clearInterval(drainInterval);
+      energy = 100;
+      cells = 0;
+      started = false;
+      gameOver = false;
+      bwCollectBtn.disabled = true;
+      bwResetBtn.textContent = 'INICIAR PRUEBA';
+      bwFeedback.className = 'bw-feedback';
+      bwFeedback.textContent = message;
+      renderBattery();
+    }
+
+    function toggleBattery() {
+      if (started && !gameOver) {
+        initBatteryIdle('Prueba detenida. Energía restablecida al 100%.');
+        return;
+      }
+      energy = 100;
+      cells = 0;
+      started = true;
+      gameOver = false;
+      bwCollectBtn.disabled = false;
+      bwResetBtn.textContent = 'DETENER';
+      bwFeedback.className = 'bw-feedback';
+      bwFeedback.textContent = 'Prueba en curso: recoge 5 celdas antes de que la energía llegue a 0%.';
+      renderBattery();
+      startDrain();
+    }
+
+    bwCollectBtn.addEventListener('click', collectCell);
+    bwResetBtn.addEventListener('click', toggleBattery);
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'e' || e.key === 'E') && started && !gameOver) {
+        const rect = document.getElementById('bateria').getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          collectCell();
+        }
+      }
+    });
+
+    initBatteryIdle();
+
+    // Filtros interactivos del Mapa Mental
+    const mmFilters = document.querySelectorAll('.mm-filter');
+    const mmBranches = document.querySelectorAll('.mm-branch');
+    mmFilters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        mmFilters.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.branch;
+        mmBranches.forEach(br => {
+          br.classList.remove('dimmed', 'highlighted');
+          if (target !== 'all') {
+            if (br.dataset.id === target) br.classList.add('highlighted');
+            else br.classList.add('dimmed');
+          }
+        });
+      });
+    });
+
+    // Copiar código de color al hacer clic en los swatches
+    const toast = document.getElementById('toast');
+    let toastTimer = null;
+    document.querySelectorAll('.swatch').forEach(sw => {
+      sw.addEventListener('click', () => {
+        const hex = sw.dataset.hex;
+        if (navigator.clipboard) navigator.clipboard.writeText(hex).catch(() => {});
+        toast.textContent = `Color ${hex} copiado`;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+      });
+    });
+
+    // Galería de capturas + Lightbox interactivo
+    const galleryItems = [
+      { src: '01_inicio.png', title: '01 · Pantalla de Arranque y Menú', desc: 'Identidad visual renovada con logo de ALPHA-6, tipografía Rajdhani Bold y navegación directa.' },
+      { src: '02_narrativa.png', title: '02 · Narrativa y Briefing de Misión', desc: 'Contexto del Sector Gamma e instrucciones iniciales con alto contraste accesible (WCAG 1.4.3).' },
+      { src: '03_exploracion.png', title: '03 · Exploración y Luces Guía Cian', desc: 'Entorno 3D industrial en Unity 6 (URP) con haces verticales y halos cian sobre cada celda.' },
+      { src: '04_hud_celda.png', title: '04 · HUD Multimodal e Interacción', desc: 'Aviso dinámico «E · Recoger celda» a menos de 4 m, estado escrito de energía y contador de celdas.' },
+      { src: '05_pausa.png', title: '05 · Menú de Pausa (Tecla Esc)', desc: 'Control y libertad del usuario para pausar el drenaje de energía y retomar la misión sin fricción.' },
+      { src: '06_victoria.png', title: '06 · Resolución y Sistema de Rangos', desc: 'Cierre del Protocolo de Fuga con calificación dinámica (S–C) según la batería restante y opción de reintento.' }
+    ];
+
+    document.querySelectorAll('.gallery-thumb img').forEach(img => {
+      img.addEventListener('error', () => img.parentElement.classList.add('missing'));
+    });
+
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbTitle = document.getElementById('lbTitle');
+    const lbDesc = document.getElementById('lbDesc');
+    const lbCounter = document.getElementById('lbCounter');
+    let lbIdx = 0;
+
+    function openLightbox(idx) {
+      lbIdx = (idx + galleryItems.length) % galleryItems.length;
+      const item = galleryItems[lbIdx];
+      lbImg.src = item.src;
+      lbImg.alt = item.title;
+      lbTitle.textContent = item.title;
+      lbDesc.textContent = item.desc;
+      lbCounter.textContent = `${lbIdx + 1} / ${galleryItems.length}`;
+      lightbox.classList.add('open');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+    }
+
+    document.querySelectorAll('.gallery-card').forEach(card => {
+      const idx = Number(card.dataset.idx);
+      card.addEventListener('click', () => openLightbox(idx));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightbox(idx);
+        }
+      });
+    });
+
+    document.getElementById('lbPrev').addEventListener('click', () => openLightbox(lbIdx - 1));
+    document.getElementById('lbNext').addEventListener('click', () => openLightbox(lbIdx + 1));
+    document.getElementById('lbClose').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') openLightbox(lbIdx - 1);
+      if (e.key === 'ArrowRight') openLightbox(lbIdx + 1);
+    });
+  </script>
+</body>
+</html>
